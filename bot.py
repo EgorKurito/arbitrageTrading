@@ -35,7 +35,7 @@ while time.time() - t < 0.5:
 ticker_1 = wss.tickers('YYWETH')
 ticker_2 = wss.tickers('EOSETH')
 ticker_3 = wss.tickers('EOSUSD')
-
+'''
 while True:
     ticker_11 = ticker_1.get()
     ticker_1_Ask = ticker_11[0][0][6]
@@ -53,8 +53,23 @@ while True:
     xxx = x * ticker_1_Ask / ticker_2_Ask * ticker_3_Bid
     print(xxx)
 
+    time.sleep(7)
+'''
 
 
-        #print("Ask Price: {}".format(ticker[0][0][6]))
-        #print("Bid Price: {}".format(ticker[0][0][0]))
+
+# noinspection PyUnreachableCode
+class Bitfinex:
+    """
+    Algorithm of trade
+    """
+    def __init__(self, ticket1=None, ticket2=None, ticket3=None, ):
+        self.ticket1 = ticket1
+        self.ticket2 = ticket2
+        self.ticket3 = ticket3
+
+
+
+x
+
 
