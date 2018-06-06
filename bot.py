@@ -16,6 +16,7 @@ log.addHandler(sh)
 log.addHandler(fh)
 logging.basicConfig(level=logging.DEBUG, handlers=[fh, sh])
 
+
 wss = BtfxWss()
 wss.start()
 
