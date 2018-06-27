@@ -43,3 +43,4 @@ for ticket in tickets:
 
     dif = ((t_A-t_B)/(t_A+t_B)/2)*100
     print(dif)
+    
