@@ -1,46 +1,38 @@
 import requests
-import logging
+import json
+import ssl
 import time
-import sys
 
-from btfxwss import BtfxWss
+from websocket import create_connection
+
+# Settings
+url = 'wss://api.bitfinex.com/ws/2'
 
 # Make a 'list' of all pairs of crypto currency from the 'str' object
 tickets = requests.get('https://api.bitfinex.com/v1/symbols').text.upper().replace('"','')[1:-1].split(',')
+# Good tickets
+good_tickets = []
+# Connection
+ws = create_connection(url, sslopt={"cert_reqs": ssl.CERT_NONE} )
 
-# Setting the BtfxWss Library
-log = logging.getLogger(__name__)
+def get_good_ticket(tickets):
+    for ticket in tickets:
 
-fh = logging.FileHandler('test.log')
-fh.setLevel(logging.DEBUG)
-sh = logging.StreamHandler(sys.stdout)
-sh.setLevel(logging.DEBUG)
+        ticker = dict(event="subscribe", channel="ticker", symbol="t{}".format(ticket))
+        ws.send(json.dumps(ticker))
 
-log.addHandler(sh)
-log.addHandler(fh)
-logging.basicConfig(level=logging.DEBUG, handlers=[fh, sh])
+        while True:
+            result = json.loads(ws.recv())
+            if (len(result) == 2) and (str(result)[-4:-2] != 'hb'):
+                # t_A - Ticker_Ask; t_B - Ticker_Bid
+                t_A = result[1][0]
+                t_B = result[1][2]
+                dif = ((t_A - t_B) / (t_A + t_B) / 2) * 100
+                if dif > -0.025:
+                    t_ticket = [ticket, t_A, t_B, dif]
+                    good_tickets.append(t_ticket)
 
-wss = BtfxWss()
-wss.start()
+                break
+    return(good_tickets)
 
-while not wss.conn.connected.is_set():
-    time.sleep(1)
-
-for ticket in tickets:
-    wss.subscribe_to_ticker(ticket)
-
-    t = time.time()
-    while time.time() - t < 0.5:
-        pass
-
-    try:
-        ticker = wss.tickers(ticket).get()
-    except KeyError:
-        continue
-    # t_A - Ticker_Ask; t_B - Ticker_Bid
-    t_A = ticker[0][0][6]
-    t_B = ticker[0][0][0]
-
-    dif = ((t_A-t_B)/(t_A+t_B)/2)*100
-    print(dif)
-    
+print(get_good_ticket(tickets))
